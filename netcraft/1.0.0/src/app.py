@@ -80,7 +80,7 @@ class Netcraft(AppBase):
         auth = (user, password)
         return requests.get(url, auth=auth, headers=headers, params=params).text
 
-    def escalate_takedown(self, user, password, id):
+    def escalate_takedown(self, user, password, takedown_id):
         url = "https://takedown.netcraft.com/apis/escalate.php"
         headers = {
             "Content-Type": "application/json"
