@@ -13,6 +13,26 @@ contact_info:
   url: https://github.com/frikky
   email: "frikky@shuffler.io"
 actions:
+  - name: report_authorise
+    description: 支持提交authors的接口
+    parameters:
+      - name: takedown_ids
+        description: 传递takedown ids支持批量执行
+        multiline: false
+        example: "[\"111\",\"2222\"]"
+        required: true
+        schema:
+          type: string
+      - name: cookie
+        description: 用户认证cookie,从WEB提取cookie粘贴进来
+        multiline: false
+        example: "PHPSESSID=xxx; MANTIS_STRING_COOKIE=xxx"
+        required: true
+        schema:
+          type: string
+    returns:
+      schema:
+        type: string
   - name: report_attack 
     description: Report an attack for takedown
     parameters:

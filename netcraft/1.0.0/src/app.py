@@ -34,6 +34,25 @@ class Netcraft(AppBase):
         auth = (user, password)
         return requests.post(url, auth=auth, headers=headers, data=data).text
 
+    def report_authorise(self, takedown_ids, cookie):
+        result = ""
+        for takedown_id in takedown_ids:
+            url = "https://takedown.netcraft.com/ajax.php"
+            headers = {
+                "Cookie": cookie,
+                "Host": "takedown.netcraft.com",
+                "Content-Length": "92",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Accept": "text/javascript, text/html, application/xml, text/xml, */*",
+                "Origin": "https://takedown.netcraft.com",
+                "Referer": "https://takedown.netcraft.com/view.php?id="+str(takedown_id),
+                "Accept-Encoding": "gzip, deflate",
+            }
+            data = "auth_target=authorise&action=loadSection&section=summary&takedown_id="+str(takedown_id)+"&ajax_request=1"
+            result = requests.post(url, headers=headers, data=data).text
+        return result
+
     # Can add a lot more to this
     def get_takedowns(self, user, password, id="", group_id="", url="", ip="", attack_url="", domain_attack="", statuses="", phishkit_only=""): 
         url = "https://takedown.netcraft.com/apis/get-info.php"
