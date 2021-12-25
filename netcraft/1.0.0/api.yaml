@@ -1,6 +1,6 @@
 walkoff_version: 1.0.0
 app_version: 1.0.0
-name: netcraft 
+name: netcraft
 description: Netcraft app interface
 tags:
   - Phishing
@@ -30,9 +30,7 @@ actions:
         required: true
         schema:
           type: string
-    returns:
-      schema:
-        type: string
+    
   - name: report_attack 
     description: Report an attack for takedown
     parameters:

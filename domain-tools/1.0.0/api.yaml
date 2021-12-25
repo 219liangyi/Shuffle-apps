@@ -1,0 +1,40 @@
+walkoff_version: 1.0.0
+app_version: 1.0.0
+name: domain tools
+description: 域名相关工具包
+tags:
+  - tools
+categories:
+  - tools
+contact_info:
+  name: "@yib0y"
+  url: https://github.com/frikky
+  email: "971339318@qq.com"
+actions:
+  - name: get_cert_info
+    description: 获取该域名关联的证书信息
+    parameters:
+      - name: url
+        description: 可以填URL也可以填域名,url后端自动提取域名
+        multiline: false
+        example: "baidu.com"
+        required: true
+        schema:
+          type: string
+    returns:
+      schema:
+        type: string
+  - name: get_ip_list
+    description: 获取域名解析后的ip列表
+    parameters:
+      - name: domain
+        description: 域名
+        multiline: false
+        example: "baidu.com"
+        required: true
+        schema:
+          type: string
+    returns:
+      schema:
+        type: string
+large_image: data:image/png;base64,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
