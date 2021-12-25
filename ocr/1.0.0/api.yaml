@@ -84,7 +84,7 @@ actions:
         schema:
           type: string
       - name: image_url
-        description:网络图片链接，与image二选一
+        description: 网络图片链接，与image二选一
         multiline: false
         example: "公网http/https url"
         required: true
