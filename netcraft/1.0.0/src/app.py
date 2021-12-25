@@ -4,6 +4,8 @@ import random
 import socket
 import asyncio
 import requests
+from http.client import HTTPConnection
+HTTPConnection.debuglevel = 1
 
 from walkoff_app_sdk.app_base import AppBase
 
@@ -35,7 +37,7 @@ class Netcraft(AppBase):
         return requests.post(url, auth=auth, headers=headers, data=data).text
 
     def report_authorise(self, takedown_ids, cookie):
-        result = ""
+        result = True
         for takedown_id in takedown_ids:
             url = "https://takedown.netcraft.com/ajax.php"
             headers = {
@@ -50,7 +52,10 @@ class Netcraft(AppBase):
                 "Accept-Encoding": "gzip, deflate",
             }
             data = "auth_target=authorise&action=loadSection&section=summary&takedown_id="+str(takedown_id)+"&ajax_request=1"
-            result = requests.post(url, headers=headers, data=data).text
+            res = requests.post(url, headers=headers, data=data)
+            if res.status_code != 200:
+                result = False
+                self.logger.error("报错了:"+str(res.status_code))
         return result
 
     # Can add a lot more to this
