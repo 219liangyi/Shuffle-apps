@@ -37,8 +37,11 @@ class Netcraft(AppBase):
         return requests.post(url, auth=auth, headers=headers, data=data).text
 
     def report_authorise(self, takedown_ids, cookie):
+        print(type(takedown_ids))
+        print(takedown_ids)
         result = True
         for takedown_id in takedown_ids:
+            print(takedown_id)
             url = "https://takedown.netcraft.com/ajax.php"
             headers = {
                 "Cookie": cookie,
