@@ -14,15 +14,15 @@ contact_info:
   email: "frikky@shuffler.io"
 actions:
   - name: report_authorise
-    description: strtype支持提交authors的接口
+    description: 支持提交authors的接口
     parameters:
-      - name: takedown_ids
-        description: test传递takedown ids支持批量执行
+      - name: takedown_id
+        description: 传递takedown_id
         multiline: false
-        example: "[\"111\",\"2222\"]"
+        example: 1111
         required: true
         schema:
-          type: list
+          type: string
       - name: cookie
         description: 用户认证cookie,从WEB提取cookie粘贴进来
         multiline: false
