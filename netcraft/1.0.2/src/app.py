@@ -40,7 +40,7 @@ class Netcraft(AppBase):
         self.logger.error(type(takedown_ids))
         self.logger.error(takedown_ids)
         result = True
-        return type(takedown_ids)
+        return str(type(takedown_ids))
         # for takedown_id in takedown_ids:
         #     print(takedown_id)
         #     url = "https://takedown.netcraft.com/ajax.php"
