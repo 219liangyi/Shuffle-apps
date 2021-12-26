@@ -87,9 +87,9 @@ actions:
         description: 网络图片链接，与image二选一
         multiline: false
         example: "公网http/https url"
-        required: true
+        required: false
         schema:
-          type: false
+          type: string
     returns:
       schema:
         type: string

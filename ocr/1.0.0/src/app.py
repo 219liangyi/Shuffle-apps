@@ -63,8 +63,7 @@ class Ocr(AppBase):
         headers = {
             "X-Auth-Token": str(token)
         }
-        return str(headers)
-        # return requests.post(url, headers=headers, json=data).text
+        return requests.post(url, headers=headers, json=data).text
 
 # Run the actual thing after we've checked params
 
