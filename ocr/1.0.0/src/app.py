@@ -61,7 +61,7 @@ class Ocr(AppBase):
                 "image": image_base64
             }
         headers = {
-            "X-Auth-Token": token
+            "X-Auth-Token": str(token)
         }
         return requests.post(url, headers=headers, json=data).text
 
