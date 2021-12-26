@@ -59,9 +59,9 @@ class DomainTools(AppBase):
 
     def get_domain_image(self, domain):
         os.system(
-            f'cd /app/src/'
+            f'cd /app/'
             f'echo ' + domain + ' | ./aquatone screenshot')
-        filedir = '/app/src/screenshots'
+        filedir = '/app/screenshots'
         #filedir = '/Users/xiaotudou/go/src/Shuffle-apps/domain-tools/1.0.0/src/screenshots'
         filename = os.listdir(filedir)[0]
         filepath = os.path.join(filedir, filename)
