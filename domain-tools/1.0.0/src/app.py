@@ -57,7 +57,7 @@ class DomainTools(AppBase):
             pass
         return ip_list
 
-    def get_domain_image(self,domain):
+    def get_domain_image(self, domain):
         os.system(
             f'cd /app/src/'
             f'echo ' + domain + ' | ./aquatone screenshot')
