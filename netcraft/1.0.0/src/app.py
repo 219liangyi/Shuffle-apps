@@ -10,7 +10,7 @@ HTTPConnection.debuglevel = 1
 from walkoff_app_sdk.app_base import AppBase
 
 class Netcraft(AppBase):
-    __version__ = "1.0.0"
+    __version__ = "1.0.2"
     app_name = "netcraft"  
 
     def __init__(self, redis, logger, console_logger=None):
@@ -36,29 +36,25 @@ class Netcraft(AppBase):
         auth = (user, password)
         return requests.post(url, auth=auth, headers=headers, data=data).text
 
-    def report_authorise(self, takedown_ids, cookie):
-        print(type(takedown_ids))
-        print(takedown_ids)
+    def report_authorise(self, takedown_id, cookie):
         result = True
-        for takedown_id in takedown_ids:
-            print(takedown_id)
-            url = "https://takedown.netcraft.com/ajax.php"
-            headers = {
-                "Cookie": cookie,
-                "Host": "takedown.netcraft.com",
-                "Content-Length": "92",
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
-                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-                "Accept": "text/javascript, text/html, application/xml, text/xml, */*",
-                "Origin": "https://takedown.netcraft.com",
-                "Referer": "https://takedown.netcraft.com/view.php?id="+str(takedown_id),
-                "Accept-Encoding": "gzip, deflate",
-            }
-            data = "auth_target=authorise&action=loadSection&section=summary&takedown_id="+str(takedown_id)+"&ajax_request=1"
-            res = requests.post(url, headers=headers, data=data)
-            if res.status_code != 200:
-                result = False
-                self.logger.error("报错了:"+str(res.status_code))
+        url = "https://takedown.netcraft.com/ajax.php"
+        headers = {
+            "Cookie": cookie,
+            "Host": "takedown.netcraft.com",
+            "Content-Length": "92",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Accept": "text/javascript, text/html, application/xml, text/xml, */*",
+            "Origin": "https://takedown.netcraft.com",
+            "Referer": "https://takedown.netcraft.com/view.php?id="+str(takedown_id),
+            "Accept-Encoding": "gzip, deflate",
+        }
+        data = "auth_target=authorise&action=loadSection&section=summary&takedown_id="+str(takedown_id)+"&ajax_request=1"
+        res = requests.post(url, headers=headers, data=data)
+        if res.status_code != 200:
+            result = False
+            self.logger.error("报错了:"+str(res.status_code))
         return result
 
     # Can add a lot more to this
