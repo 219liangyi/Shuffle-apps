@@ -14,7 +14,7 @@ contact_info:
   email: "frikky@shuffler.io"
 actions:
   - name: report_authorise
-    description: test支持提交authors的接口
+    description: type支持提交authors的接口
     parameters:
       - name: takedown_ids
         description: test传递takedown ids支持批量执行
