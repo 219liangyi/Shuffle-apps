@@ -59,25 +59,22 @@ class DomainTools(AppBase):
 
     def get_domain_image(self, domain):
         os.system(
-            f'cd /app/'
-            f'echo ' + domain + ' | ./aquatone screenshot')
+            f'cd /app'
+            f'&& echo ' + domain + ' | ./aquatone screenshot')
         filedir = '/app/screenshots'
-        return str(os.listdir("/app"))
         #filedir = '/Users/xiaotudou/go/src/Shuffle-apps/domain-tools/1.0.0/src/screenshots'
-
-        
-        # filename = os.listdir(filedir)[0]
-        # filepath = os.path.join(filedir, filename)
-        # if os.path.isfile(filepath):
-        #     print(filepath)
-        #     with open(filepath, 'rb') as f:
-        #         image = f.read()
-        #         image_base64 = base64.b64encode(image)
-        #         s = image_base64.decode()
-        #         result = 'data:image/png;base64,%s' % s
-        #         os.system(f'rm -rf ' + filedir)
-        #         return result
-        # return filepath
+        filename = os.listdir(filedir)[0]
+        filepath = os.path.join(filedir, filename)
+        if os.path.isfile(filepath):
+            print(filepath)
+            with open(filepath, 'rb') as f:
+                image = f.read()
+                image_base64 = base64.b64encode(image)
+                s = image_base64.decode()
+                result = 'data:image/png;base64,%s' % s
+                os.system(f'rm -rf ' + filedir)
+                return result
+        return filepath
 
 # Run the actual thing after we've checked params
 
