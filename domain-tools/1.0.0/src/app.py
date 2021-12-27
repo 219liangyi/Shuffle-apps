@@ -60,9 +60,10 @@ class DomainTools(AppBase):
     def get_domain_image(self, domain):
         sta = os.system(
             f'sudo cd /app/'
-            f'&& echo ' + domain + f' | ./aquatone screenshot &> info.txt')
+            f'&& echo ' + domain + ' | ./aquatone screenshot &> info.txt')
+        os.system(f'date > time.txt')
         filedir = '/app/screenshots'
-        return str(os.listdir("/app"))
+        return str(os.listdir("/app/"))
         #filedir = '/Users/xiaotudou/go/src/Shuffle-apps/domain-tools/1.0.0/src/screenshots'
         filename = os.listdir(filedir)[0]
         filepath = os.path.join(filedir, filename)
