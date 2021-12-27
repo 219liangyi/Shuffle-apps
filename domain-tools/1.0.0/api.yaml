@@ -38,7 +38,7 @@ actions:
       schema:
         type: string
   - name: get_domain_image
-    description: 获取域名或IP访问后的屏幕截图
+    description: test获取域名或IP访问后的屏幕截图
     parameters:
       - name: domain
         description: 域名
