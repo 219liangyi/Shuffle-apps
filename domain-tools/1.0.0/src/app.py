@@ -61,9 +61,8 @@ class DomainTools(AppBase):
         sta = os.system(
             # f'cd /app/'
             f'echo ' + domain + ' | ./aquatone screenshot')
-        return sta
         filedir = '/app/screenshots'
-        return str(os.listdir("/app")[0])
+        return str(os.listdir("/app"))
         #filedir = '/Users/xiaotudou/go/src/Shuffle-apps/domain-tools/1.0.0/src/screenshots'
         filename = os.listdir(filedir)[0]
         filepath = os.path.join(filedir, filename)
