@@ -11,7 +11,7 @@ import subprocess
 from walkoff_app_sdk.app_base import AppBase
 
 class HTTP(AppBase):
-    __version__ = "1.0.0"
+    __version__ = "1.2.0"
     app_name = "http"  
 
     def __init__(self, redis, logger, console_logger=None):
@@ -130,102 +130,248 @@ class HTTP(AppBase):
 
         return url
 
-    def GET(self, url, headers="", username="", password="", verify=True):
+    def return_file(self, requestdata):
+        filedata = {
+            "filename": "response.txt",
+            "data": requestdata,
+        }
+        fileret = self.set_files([filedata])
+        if len(fileret) == 1:
+            return {"success": True, "file_id": fileret[0]}
+
+        return fileret
+
+    def GET(self, url, headers="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
 
         parsed_headers = self.splitheaders(headers)
         parsed_headers["User-Agent"] = "Shuffle Automation"
         verify = self.checkverify(verify)
+        proxies = None
+        if http_proxy: 
+            proxies["http"] = http_proxy
+        if https_proxy: 
+            proxies["https"] = https_proxy
 
         auth=None
         if username or password:
             auth = requests.auth.HTTPBasicAuth(username, password)
 
-        return requests.get(url, headers=parsed_headers, auth=auth, verify=verify).text
+        if not timeout:
+            timeout = 5
+        if timeout:
+            timeout = int(timeout)
 
-    def POST(self, url, headers="", body="", username="", password="", verify=True):
+        if to_file == "true":
+            to_file = True
+        else:
+            to_file = False 
+
+        request = requests.get(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout)
+        if not to_file:
+            return request.text
+
+        return self.return_file(request.text)
+
+    def POST(self, url, headers="", body="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
 
         parsed_headers = self.splitheaders(headers)
         parsed_headers["User-Agent"] = "Shuffle Automation"
         verify = self.checkverify(verify)
         body = self.checkbody(body)
+        proxies = None
+        if http_proxy: 
+            proxies["http"] = http_proxy
+        if https_proxy: 
+            proxies["https"] = https_proxy
 
         auth=None
         if username or password:
             auth = requests.auth.HTTPBasicAuth(username, password)
 
-        return requests.post(url, headers=parsed_headers, auth=auth, data=body, verify=verify).text
+        if not timeout:
+            timeout = 5
+        if timeout:
+            timeout = int(timeout)
+
+        if to_file == "true":
+            to_file = True
+        else:
+            to_file = False 
+
+        request = requests.post(url, headers=parsed_headers, auth=auth, data=body, verify=verify, proxies=proxies, timeout=timeout).text
+        if not to_file:
+            return request.text
+
+        return self.return_file(request.text)
 
     # UNTESTED BELOW HERE
-    def PUT(self, url, headers="", body="", username="", password="", verify=True):
+    def PUT(self, url, headers="", body="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
 
         parsed_headers = self.splitheaders(headers)
         parsed_headers["User-Agent"] = "Shuffle Automation"
         verify = self.checkverify(verify)
         body = self.checkbody(body)
+        proxies = None
+        if http_proxy: 
+            proxies["http"] = http_proxy
+        if https_proxy: 
+            proxies["https"] = https_proxy
+
 
         auth=None
         if username or password:
             auth = requests.auth.HTTPBasicAuth(username, password)
 
-        return requests.put(url, headers=parsed_headers, auth=auth, data=body, verify=verify).text
+        if not timeout:
+            timeout = 5
+        if timeout:
+            timeout = int(timeout)
 
-    def PATCH(self, url, headers="", body="", username="", password="", verify=True):
+        if to_file == "true":
+            to_file = True
+        else:
+            to_file = False 
+
+        request = requests.put(url, headers=parsed_headers, auth=auth, data=body, verify=verify, proxies=proxies, timeout=timeout).text
+        if not to_file:
+            return request.text
+
+        return self.return_file(request.text)
+
+    def PATCH(self, url, headers="", body="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
 
         parsed_headers = self.splitheaders(headers)
         parsed_headers["User-Agent"] = "Shuffle Automation"
         verify = self.checkverify(verify)
         body = self.checkbody(body)
+        proxies = None
+        if http_proxy: 
+            proxies["http"] = http_proxy
+        if https_proxy: 
+            proxies["https"] = https_proxy
 
         auth=None
         if username or password:
             auth = requests.auth.HTTPBasicAuth(username, password)
 
-        return requests.patch(url, headers=parsed_headers, data=body, auth=auth, verify=verify).text
+        if not timeout:
+            timeout = 5
+        if timeout:
+            timeout = int(timeout)
 
-    def DELETE(self, url, headers="", body="", username="", password="", verify=True):
+        if to_file == "true":
+            to_file = True
+        else:
+            to_file = False 
+
+        request = requests.patch(url, headers=parsed_headers, data=body, auth=auth, verify=verify, proxies=proxies, timeout=timeout).text
+        if not to_file:
+            return request.text
+
+        return self.return_file(request.text)
+
+    def DELETE(self, url, headers="", body="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
 
         parsed_headers = self.splitheaders(headers)
         parsed_headers["User-Agent"] = "Shuffle Automation"
         verify = self.checkverify(verify)
+        proxies = None
+        if http_proxy: 
+            proxies["http"] = http_proxy
+        if https_proxy: 
+            proxies["https"] = https_proxy
 
         auth=None
         if username or password:
             auth = requests.auth.HTTPBasicAuth(username, password)
 
-        return requests.delete(url, headers=parsed_headers, auth=auth, verify=verify).text
+        if not timeout:
+            timeout = 5
+        if timeout:
+            timeout = int(timeout)
 
-    def HEAD(self, url, headers="", body="", username="", password="", verify=True):
+        if to_file == "true":
+            to_file = True
+        else:
+            to_file = False 
+
+        request = requests.delete(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout).text
+        if not to_file:
+            return request.text
+
+        return self.return_file(request.text)
+
+    def HEAD(self, url, headers="", body="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
 
         parsed_headers = self.splitheaders(headers)
         parsed_headers["User-Agent"] = "Shuffle Automation"
         verify = self.checkverify(verify)
         body = self.checkbody(body)
+        proxies = None
+        if http_proxy: 
+            proxies["http"] = http_proxy
+        if https_proxy: 
+            proxies["https"] = https_proxy
 
         auth=None
         if username or password:
             auth = requests.auth.HTTPBasicAuth(username, password)
 
-        return requests.head(url, headers=parsed_headers, auth=auth, verify=verify).text
+        if not timeout:
+            timeout = 5
+        if timeout:
+            timeout = int(timeout)
 
-    def OPTIONS(self, url, headers="", body="", username="", password="", verify=True):
+        if to_file == "true":
+            to_file = True
+        else:
+            to_file = False 
+
+        request = requests.head(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout).text
+        if not to_file:
+            return request.text
+
+        return self.return_file(request.text)
+
+    def OPTIONS(self, url, headers="", body="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
 
         parsed_headers = self.splitheaders(headers)
         parsed_headers["User-Agent"] = "Shuffle Automation"
         verify = self.checkverify(verify)
         body = self.checkbody(body)
+        proxies = None
+        if http_proxy: 
+            proxies["http"] = http_proxy
+        if https_proxy: 
+            proxies["https"] = https_proxy
 
         auth=None
         if username or password:
             auth = requests.auth.HTTPBasicAuth(username, password)
 
-        return requests.options(url, headers=parsed_headers, auth=auth, verify=verify).text
+        if not timeout:
+            timeout = 5
+        
+        if timeout:
+            timeout = int(timeout)
+
+        if to_file == "true":
+            to_file = True
+        else:
+            to_file = False 
+
+        request = requests.options(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout).text
+        if not to_file:
+            return request.text
+
+        return self.return_file(request.text)
 
 
 # Run the actual thing after we've checked params
