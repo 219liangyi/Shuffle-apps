@@ -1,5 +1,5 @@
-walkoff_version: 1.0.0
-app_version: 1.0.0
+walkoff_version: 1.1.0
+app_version: 1.1.0
 name: email
 description: Email app
 tags:
@@ -45,7 +45,7 @@ actions:
     returns:
       schema:
         type: string
-  - name: send_email
+  - name: send_email_smtp
     description: Send an email with SMTP
     parameters:
       - name: username
@@ -66,6 +66,13 @@ actions:
         description: The host of the SMTP
         multiline: false
         example: "smtp-mail.outlook.com"
+        required: true
+        schema:
+          type: string
+      - name: smtp_port
+        description: The port to use for SMTP
+        multiline: false
+        example: "587"
         required: true
         schema:
           type: string
@@ -90,11 +97,20 @@ actions:
         required: true
         schema:
           type: string
-      - name: smtp_port
-        description: The port to use for SMTP
+      - name: attachments 
+        description: Send files from shuffle as part of the email 
         multiline: false
-        example: "587"
-        required: true
+        example: "file_id1,file_id2,file_id3"
+        required: false
+        schema:
+          type: string
+      - name: ssl_verify 
+        description: Whether to use TLS or not
+        example: "true"
+        required: false 
+        options:
+          - true
+          - false
         schema:
           type: string
     returns:
@@ -190,6 +206,47 @@ actions:
         required: true
         schema:
           type: bool
+      - name: ssl_verify 
+        description: Whether to use TLS or not
+        example: "true"
+        required: false 
+        options:
+          - true
+          - false
+        schema:
+          type: string
+  - name: parse_email_file
+    description: Takes a file from shuffle and analyzes it if it's a valid .eml or .msg
+    parameters:
+      - name: file_id
+        description: file id
+        required: true
+        multiline: true
+        example: 'adf5e3d0fd85633be17004735a0a119e'
+        schema:
+          type: string
+      - name: file_extension
+        description: Extension of file you want to convert
+        required: true
+        options:
+          - eml 
+          - msg
+        example: 'eml'
+        schema:
+          type: string
+  - name: parse_email_headers
+    description: 
+    parameters:
+      - name: email_headers
+        description: Email headers
+        required: true
+        multiline: true
+        example: 'Email Headers'
+        schema:
+          type: string            
+    returns:
+      schema:
+        type: string
     returns:
       schema:
         type: string

@@ -11,7 +11,7 @@ import subprocess
 from walkoff_app_sdk.app_base import AppBase
 
 class HTTP(AppBase):
-    __version__ = "1.2.0"
+    __version__ = "1.3.0"
     app_name = "http"  
 
     def __init__(self, redis, logger, console_logger=None):
@@ -85,13 +85,13 @@ class HTTP(AppBase):
         return parsed_headers
 
     def checkverify(self, verify):
-        if verify == None:
+        if verify.lower().strip() == "false":
+            return False
+        elif verify == None:
             return False
         elif verify:
             return True
         elif not verify:
-            return False
-        elif verify.lower().strip() == "false":
             return False
         else:
             return True 
@@ -141,6 +141,29 @@ class HTTP(AppBase):
             return {"success": True, "file_id": fileret[0]}
 
         return fileret
+            
+    def prepare_response(self, request):
+        try:
+            parsedheaders = {}
+            for key, value in request.headers.items():
+                parsedheaders[key] = value
+            
+            jsondata = request.text
+            try:
+                jsondata = json.loads(jsondata)
+            except:
+                pass
+
+            return json.dumps({
+                "success": True,
+                "status": request.status_code,
+                "url": request.url,
+                "headers": parsedheaders,
+                "body": jsondata,
+            })
+        except Exception as e:
+            print(f"[WARNING] Failed in request: {e}")
+            return request.text
 
     def GET(self, url, headers="", username="", password="", verify=True, http_proxy="", https_proxy="", timeout=5, to_file=False):
         url = self.fix_url(url)
@@ -170,7 +193,7 @@ class HTTP(AppBase):
 
         request = requests.get(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout)
         if not to_file:
-            return request.text
+            return self.prepare_response(request)
 
         return self.return_file(request.text)
 
@@ -203,7 +226,7 @@ class HTTP(AppBase):
 
         request = requests.post(url, headers=parsed_headers, auth=auth, data=body, verify=verify, proxies=proxies, timeout=timeout)
         if not to_file:
-            return request.text
+            return self.prepare_response(request)
 
         return self.return_file(request.text)
 
@@ -238,7 +261,7 @@ class HTTP(AppBase):
 
         request = requests.put(url, headers=parsed_headers, auth=auth, data=body, verify=verify, proxies=proxies, timeout=timeout)
         if not to_file:
-            return request.text
+            return self.prepare_response(request)
 
         return self.return_file(request.text)
 
@@ -271,7 +294,7 @@ class HTTP(AppBase):
 
         request = requests.patch(url, headers=parsed_headers, data=body, auth=auth, verify=verify, proxies=proxies, timeout=timeout)
         if not to_file:
-            return request.text
+            return self.prepare_response(request)
 
         return self.return_file(request.text)
 
@@ -303,7 +326,7 @@ class HTTP(AppBase):
 
         request = requests.delete(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout)
         if not to_file:
-            return request.text
+            return self.prepare_response(request)
 
         return self.return_file(request.text)
 
@@ -336,7 +359,7 @@ class HTTP(AppBase):
 
         request = requests.head(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout)
         if not to_file:
-            return request.text
+            return self.prepare_response(request)
 
         return self.return_file(request.text)
 
@@ -370,7 +393,7 @@ class HTTP(AppBase):
 
         request = requests.options(url, headers=parsed_headers, auth=auth, verify=verify, proxies=proxies, timeout=timeout)
         if not to_file:
-            return request.text
+            return self.prepare_response(request)
 
         return self.return_file(request.text)
 

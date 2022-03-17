@@ -8,11 +8,25 @@ import base64
 import imaplib
 import smtplib
 import eml_parser
+import time
+import random
+import eml_parser
+import mailparser
+import extract_msg
+import jsonpickle
+
 from glom import glom
+from msg_parser import MsOxMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+
 from walkoff_app_sdk.app_base import AppBase
 
+def json_serial(obj):
+    if isinstance(obj, datetime.datetime):
+        serial = obj.isoformat()
+        return serial
 
 def default(o):
     """helpers to store item in json
@@ -30,7 +44,7 @@ def default(o):
 
 
 class Email(AppBase):
-    __version__ = "1.0.0"
+    __version__ = "1.1.0"
     app_name = "email"
 
     def __init__(self, redis, logger, console_logger=None):
@@ -56,8 +70,8 @@ class Email(AppBase):
         headers = {"Authorization": "Bearer %s" % apikey}
         return requests.post(url, headers=headers, json=data).text
 
-    def send_email(
-        self, username, password, smtp_host, recipient, subject, body, smtp_port
+    def send_email_smtp(
+        self, username, password, smtp_host, recipient, subject, body, smtp_port, attachments="", ssl_verify="True"
     ):
         if type(smtp_port) == str:
             try:
@@ -67,15 +81,19 @@ class Email(AppBase):
 
         try:
             s = smtplib.SMTP(host=smtp_host, port=smtp_port)
-        except socket.gaierror:
-            return "Bad SMTP host or port"
+        except socket.gaierror as e:
+            return f"Bad SMTP host or port: {e}"
 
-        s.starttls()
+        if ssl_verify == "false" or ssl_verify == "False":
+            pass
+        else:
+            s.starttls()
 
-        try:
-            s.login(username, password)
-        except smtplib.SMTPAuthenticationError:
-            return "Bad username or password"
+        if len(username) > 0 or len(password) > 0:
+            try:
+                s.login(username, password)
+            except smtplib.SMTPAuthenticationError as e:
+                return f"Bad username or password: {e}"
 
         # setup the parameters of the message
         msg = MIMEMultipart()
@@ -83,6 +101,42 @@ class Email(AppBase):
         msg["To"] = recipient
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "html"))
+
+        # Read the attachments
+        attachment_count = 0
+        try:
+            if attachments != None and len(attachments) > 0:
+                print("Got attachments: %s" % attachments)
+                attachmentsplit = attachments.split(",")
+
+                #attachments = parse_list(attachments, splitter=",")
+                #print("Got attachments2: %s" % attachmentsplit)
+                print("Before loop")
+                files = []
+                for file_id in attachmentsplit:
+                    print(f"Looping {file_id}")
+                    file_id = file_id.strip()
+                    new_file = self.get_file(file_id)
+                    print(f"New file: {new_file}")
+                    try:
+                        part = MIMEApplication(
+                            new_file["data"],
+                            Name=new_file["filename"],
+                        )
+                        part["Content-Disposition"] = f"attachment; filename=\"{new_file['filename']}\""
+                        msg.attach(part)
+                        attachment_count += 1
+                    except Exception as e:
+                        print(f"[WARNING] Failed to attach {file_id}: {e}")
+
+
+                    #files.append(new_file)
+
+                #return files
+                #data["attachments"] = files
+        except Exception as e:
+            print(f"Error in attachment parsing for email: {e}")
+
 
         try:
             s.send_message(msg)
@@ -93,7 +147,11 @@ class Email(AppBase):
             }
 
         print("Successfully sent email with subject %s to %s" % (subject, recipient))
-        return "Email sent to %s!" % recipient
+        return {
+            "success": True, 
+            "reason": "Email sent to %s!" % recipient,
+            "attachments": attachment_count
+        }
 
     def get_emails_imap(
         self,
@@ -108,6 +166,7 @@ class Email(AppBase):
         include_attachment_data,
         upload_email_shuffle,
         upload_attachments_shuffle,
+        ssl_verify="True"
     ):
         def path_to_dict(path, value=None):
             def pack(parts):
@@ -137,7 +196,11 @@ class Email(AppBase):
         except ConnectionRefusedError as error:
             try:
                 email = imaplib.IMAP4(imap_server)
-                email.starttls()
+
+                if ssl_verify == "false" or ssl_verify == "False":
+                    pass
+                else:
+                    email.starttls()
             except socket.gaierror as error:
                 return "Can't connect to IMAP server %s: %s" % (imap_server, error)
         except socket.gaierror as error:
@@ -239,6 +302,45 @@ class Email(AppBase):
         except Exception as err:
             return "Error during email processing: {}".format(err)
         return json.dumps(emails, default=default)
+
+    def parse_email_file(self, file_id, file_extension):
+        file_path = self.get_file(file_id)
+        if file_path["success"] == False:
+            return {
+                "success": False,
+                "reason": "Couldn't get file with ID %s" % file_id
+            }
+
+        print("File: %s" % file_path)
+        if file_extension.lower() == 'eml':
+            print('working with .eml file')
+            ep = eml_parser.EmlParser()
+            try:
+                parsed_eml = ep.decode_email_bytes(file_path['data'])
+                return json.dumps(parsed_eml, default=json_serial)   
+            except Exception as e:
+                return {"Success":"False","Message":f"Exception occured: {e}"} 
+        elif file_extension.lower() == 'msg':
+            print('working with .msg file')
+            try:
+                msg = MsOxMessage(file_path['data'])
+                msg_properties_dict = msg.get_properties()
+                print(msg_properties_dict)
+                frozen = jsonpickle.encode(msg_properties_dict)
+                return frozen
+            except Exception as e:
+                return {"Success":"False","Message":f"Exception occured: {e}"}    
+        else:
+            return {"Success":"False","Message":f"No file handler for file extension {file_extension}"}    
+
+    def parse_email_headers(self, email_headers):
+        try:
+            email_headers = bytes(email_headers,'utf-8')
+            ep = eml_parser.EmlParser()
+            parsed_headers = ep.decode_email_bytes(email_headers)
+            return json.dumps(parsed_headers, default=json_serial)   
+        except Exception as e:
+            raise Exception(e)
 
 
 # Run the actual thing after we've checked params
