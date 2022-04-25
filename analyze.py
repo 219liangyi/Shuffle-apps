@@ -1,5 +1,7 @@
 import yaml
 import os
+import subprocess
+
 
 basedir = "."
 dirs = os.listdir(basedir)
@@ -20,7 +22,11 @@ for basename in dirs:
 
         try:
             with open(filepath, "r") as tmp:
-                ret = yaml.load(tmp.read())
+                try:
+                    ret = yaml.full_load(tmp.read())
+                except yaml.scanner.ScannerError as e:
+                    print(f"Bad yaml in {filepath} (2): {e}")
+                    continue
 
                 newname = ret["name"].lower().replace(" ", "-", -1).replace(".", "-", -1)
                 if newname != basename:
@@ -46,7 +52,12 @@ for basename in dirs:
         action_names = []
         try:
             with open(apifile, "r") as tmp:
-                apidata = yaml.load(tmp.read())
+                try:
+                    apidata = yaml.full_load(tmp.read())
+                except yaml.scanner.ScannerError as e:
+                    print(f"Bad yaml in {apifile} (2): {e}")
+                    continue
+
                 for item in apidata["actions"]:
                     action_names.append(item["name"])
         except NotADirectoryError as e:
@@ -57,6 +68,28 @@ for basename in dirs:
             for action_name in action_names:
                 if not action_name in pythondata:
                     print(f"===> Couldn't find action \"{action_name}\" from {apifile} in script {pythonfile}") 
+
+            code = f"python3 {pythonfile}"
+            process = subprocess.Popen(
+                code,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                shell=True,  # nosec
+            )
+            stdout = process.communicate()
+            item = ""
+            if len(stdout[0]) > 0:
+                #print("Succesfully ran bash!")
+                item = stdout[0]
+            else:
+                item = stdout[1]
+                if "ModuleNotFoundError" in item:
+                    continue
+
+                print(f"FAILED to run bash with code {code}: {item}")
+
+
 
 
     #break

@@ -85,7 +85,7 @@ class HTTP(AppBase):
         return parsed_headers
 
     def checkverify(self, verify):
-        if verify.lower().strip() == "false":
+        if str(verify).lower().strip() == "false":
             return False
         elif verify == None:
             return False
@@ -98,20 +98,29 @@ class HTTP(AppBase):
 
     def checkbody(self, body):
         # Indicates json
-        if body.strip().startswith("{"):
-            body = json.dumps(ast.literal_eval(body))
+        if isinstance(body, str):
+            if body.strip().startswith("{"):
+                body = json.dumps(ast.literal_eval(body))
 
 
-            # Not sure if loading is necessary
-            # Seemed to work with plain string into data=body too, and not parsed json=body
-            #try:
-            #    body = json.loads(body)
-            #except json.decoder.JSONDecodeError as e:
-            #    return body
+                # Not sure if loading is necessary
+                # Seemed to work with plain string into data=body too, and not parsed json=body
+                #try:
+                #    body = json.loads(body)
+                #except json.decoder.JSONDecodeError as e:
+                #    return body
 
-            return body
-        else:
-            return body
+                return body
+            else:
+                return body
+
+        if isinstance(body, dict) or isinstance(body, list):
+            try:
+                body = json.dumps(body)
+            except:
+                return body
+
+        return body
 
     def fix_url(self, url):
         # Random bugs seen by users
@@ -147,6 +156,12 @@ class HTTP(AppBase):
             parsedheaders = {}
             for key, value in request.headers.items():
                 parsedheaders[key] = value
+
+            cookies = {}
+            if request.cookies:
+                for key, value in request.cookies.items():
+                    cookies[key] = value
+
             
             jsondata = request.text
             try:
@@ -160,6 +175,7 @@ class HTTP(AppBase):
                 "url": request.url,
                 "headers": parsedheaders,
                 "body": jsondata,
+                "cookies":cookies,
             })
         except Exception as e:
             print(f"[WARNING] Failed in request: {e}")
